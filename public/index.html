@@ -2,42 +2,137 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#000000" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta
-      name="description"
-      content="Web site created using create-react-app"
+      name="viewport"
+      content="width=device-width, initial-scale=1, maximum-scale=1, shrink-to-fit=no"
     />
-    <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
-    <!--
-      manifest.json provides metadata used when your web app is installed on a
-      user's mobile device or desktop. See https://developers.google.com/web/fundamentals/web-app-manifest/
-    -->
-    <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
-    <!--
-      Notice the use of %PUBLIC_URL% in the tags above.
-      It will be replaced with the URL of the `public` folder during the build.
-      Only files inside the `public` folder can be referenced from the HTML.
+    <title>Orders | Equation - Multipurpose Bootstrap Dashboard Template</title>
+    <link rel="icon" type="image/x-icon" href="assets/img/favicon.ico" />
+    <!-- BEGIN GLOBAL MANDATORY STYLES -->
+    <link
+      href="https://fonts.googleapis.com/css?family=Open+Sans:400,600,700"
+      rel="stylesheet"
+    />
+    <link
+      href="bootstrap/css/bootstrap.min.css"
+      rel="stylesheet"
+      type="text/css"
+    />
+    <link href="assets/css/plugins.css" rel="stylesheet" type="text/css" />
+    <!-- END GLOBAL MANDATORY STYLES -->
 
-      Unlike "/favicon.ico" or "favicon.ico", "%PUBLIC_URL%/favicon.ico" will
-      work correctly both with client-side routing and a non-root public URL.
-      Learn how to configure a non-root public URL by running `npm run build`.
-    -->
-    <title>React App</title>
+    <!--  BEGIN CUSTOM STYLE FILE  -->
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="plugins/table/datatable/datatables.css"
+    />
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="assets/css/ecommerce/order.css"
+    />
+    <!--  END CUSTOM STYLE FILE  -->
+    <!--  BEGIN CUSTOM STYLE FILE  -->
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="plugins/table/datatable/datatables.css"
+    />
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="assets/css/ecommerce/view_customers.css"
+    />
+    <!--  BEGIN CUSTOM STYLE FILE  -->
+    <!--  BEGIN CUSTOM STYLE FILE  -->
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="plugins/table/datatable/datatables.css"
+    />
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="assets/css/ecommerce/view_payments.css"
+    />
+    <!--  BEGIN CUSTOM STYLE FILE  -->
   </head>
   <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>
     <div id="root"></div>
-    <!--
-      This HTML file is a template.
-      If you open it directly in the browser, you will see an empty page.
 
-      You can add webfonts, meta tags, or analytics to this file.
-      The build step will place the bundled scripts into the <body> tag.
+    <!--  END CONTROL SIDEBAR  -->
 
-      To begin the development, run `npm start` or `yarn start`.
-      To create a production bundle, use `npm run build` or `yarn build`.
-    -->
+    <!-- BEGIN GLOBAL MANDATORY SCRIPTS -->
+    <script src="assets/js/libs/jquery-3.1.1.min.js"></script>
+    <script src="bootstrap/js/popper.min.js"></script>
+    <script src="bootstrap/js/bootstrap.min.js"></script>
+    <script src="plugins/scrollbar/jquery.mCustomScrollbar.concat.min.js"></script>
+    <script src="assets/js/app.js"></script>
+
+    <script>
+      $(document).ready(function () {
+        App.init();
+      });
+    </script>
+    <script src="assets/js/custom.js"></script>
+    <!-- END GLOBAL MANDATORY SCRIPTS -->
+
+    <!--  BEGIN CUSTOM SCRIPT FILES  -->
+    <script src="plugins/table/datatable/datatables.js"></script>
+    <script src="plugins/progressbar/progressbar.min.js"></script>
+    <script src="assets/js/ecommerce/order.js"></script>
+    <!--  END CUSTOM SCRIPT FILES  -->
+    <!--  BEGIN CUSTOM SCRIPT FILES  -->
+    <script src="plugins/table/datatable/datatables.js"></script>
+    <script>
+      var product_customers = $("#ecommerce-product-customers").DataTable({
+        lengthMenu: [5, 10, 20, 50, 100],
+        drawCallback: function (settings) {
+          $('[data-toggle="tooltip"]').tooltip();
+        },
+        headerCallback: function (e, a, t, n, s) {
+          e.getElementsByTagName("th")[0].innerHTML =
+            '<label class="new-control new-checkbox checkbox-primary m-auto">\n<input type="checkbox" class="new-control-input chk-parent select-customers-info" id="customer-all-info">\n<span class="new-control-indicator"></span><span style="visibility:hidden">c</span>\n</label>';
+        },
+        columnDefs: [
+          {
+            targets: 0,
+            width: "30px",
+            className: "",
+            orderable: !1,
+            render: function (e, a, t, n) {
+              return '<label class="new-control new-checkbox checkbox-primary  m-auto">\n<input type="checkbox" class="new-control-input child-chk select-customers-info" id="customer-all-info">\n<span class="new-control-indicator"></span><span style="visibility:hidden">c</span>\n</label>';
+            },
+          },
+        ],
+        language: {
+          paginate: {
+            previous: "<i class='flaticon-arrow-left-1'></i>",
+            next: "<i class='flaticon-arrow-right'></i>",
+          },
+          info: "Showing page _PAGE_ of _PAGES_",
+        },
+      });
+      multiCheck(product_customers);
+    </script>
+    <!--  BEGIN CUSTOM SCRIPT FILES  -->
+    <!--  BEGIN CUSTOM SCRIPT FILES  -->
+    <script src="plugins/table/datatable/datatables.js"></script>
+    <script>
+      $("#ecommerce-product-view").DataTable({
+        lengthMenu: [5, 10, 20, 50, 100],
+        language: {
+          paginate: {
+            previous: "<i className='flaticon-arrow-left-1'></i>",
+            next: "<i className='flaticon-arrow-right'></i>",
+          },
+          info: "Showing page _PAGE_ of _PAGES_",
+        },
+      });
+    </script>
+    <!--  END CUSTOM SCRIPT FILES  -->
   </body>
 </html>
