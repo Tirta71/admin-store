@@ -1,14 +1,6 @@
 import React from "react";
-import { NavLink, useLocation } from "react-router-dom";
 
 export default function SideBar() {
-  const location = useLocation();
-
-  // Fungsi untuk menentukan apakah suatu item menu harus diaktifkan berdasarkan URL saat ini
-  const isMenuItemActive = (menuItemPath) => {
-    return location.pathname === menuItemPath;
-  };
-
   return (
     <div className="sidebar-wrapper sidebar-theme">
       <div id="dismiss" className="d-lg-none">
@@ -28,8 +20,8 @@ export default function SideBar() {
         <ul className="list-unstyled menu-categories" id="accordionExample">
           <li className="menu"></li>
           <li className="menu">
-            <NavLink
-              to="/ecommerce"
+            <a
+              href="#ecommerce"
               data-toggle="collapse"
               aria-expanded="true"
               className="dropdown-toggle"
@@ -41,21 +33,21 @@ export default function SideBar() {
               <div>
                 <i className="flaticon-right-arrow"></i>
               </div>
-            </NavLink>
+            </a>
             <ul
               className="collapse submenu list-unstyled show"
               id="ecommerce"
               data-parent="#accordionExample"
             >
-              <li className={isMenuItemActive("/") ? "active" : ""}>
-                <NavLink to="/">Orders</NavLink>
+              <li className="">
+                <a href="/"> Orders </a>
               </li>
 
-              <li className={isMenuItemActive("/payment") ? "active" : ""}>
-                <NavLink to="/payment">View Payments</NavLink>
+              <li>
+                <a href="/payment"> View Payments </a>
               </li>
-              <li className={isMenuItemActive("/customer") ? "active" : ""}>
-                <NavLink to="/customer">View Customers</NavLink>
+              <li>
+                <a href="/customer"> View Customers </a>
               </li>
             </ul>
           </li>
