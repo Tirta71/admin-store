@@ -11,10 +11,6 @@ export default function NavMobile() {
         >
           <i className="flaticon-menu-line-2"></i>
         </a>
-        <a href="index.html" className="">
-          {" "}
-          <img src="assets/img/logo-3.png" className="img-fluid" alt="logo" />
-        </a>
       </div>
       <ul className="nav navbar-nav">
         <li className="nav-item d-lg-none">
