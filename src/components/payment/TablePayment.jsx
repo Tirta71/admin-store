@@ -217,7 +217,7 @@ export default function TablePayment() {
                     <td>{getUsername(payment.userId)}</td>
                     <td>{payment.id}</td>
                     <td>{payment.date}</td>
-                    <td>Rp. {payment.price}</td>
+                    <td>Rp. {parseInt(payment.price).toLocaleString()}</td>
                     <td>
                       <span
                         className={`badge ${
