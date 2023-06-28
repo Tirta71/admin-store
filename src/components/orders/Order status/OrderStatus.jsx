@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import Swal from "sweetalert2";
 
 export default function OrderStatus() {
   const [orderStatus, setOrderStatus] = useState([]);
@@ -68,7 +69,7 @@ export default function OrderStatus() {
 
       setOrderStatus(orderStatusData);
     } catch (error) {
-      console.error("Error fetching orders:", error);
+      console.log(error);
     }
   };
 

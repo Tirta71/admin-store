@@ -1,11 +1,14 @@
+/* eslint-disable no-unused-vars */
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { API_URL } from "../../../dataApi";
+import Swal from "sweetalert2";
 
 export default function OrderListing() {
   const [orders, setOrders] = useState([]);
   const [users, setUsers] = useState([]);
   const [filterStatus, setFilterStatus] = useState("");
+  const [filterGameTitle, setFilterGameTitle] = useState("");
   const [currentPage, setCurrentPage] = useState({});
   const [currentOrders, setCurrentOrders] = useState({});
 
@@ -13,6 +16,11 @@ export default function OrderListing() {
 
   useEffect(() => {
     fetchOrders();
+    const interval = setInterval(fetchOrders, 10000);
+
+    return () => {
+      clearInterval(interval);
+    };
   }, []);
 
   const fetchOrders = async () => {
@@ -21,6 +29,9 @@ export default function OrderListing() {
       const usersData = response.data;
       setUsers(usersData);
       const ordersPromises = usersData.map(async (user) => {
+        // Delay setiap permintaan 500ms
+        await new Promise((resolve) => setTimeout(resolve, 500));
+
         const userResponse = await axios.get(`${API_URL}/${user.id}/history`);
         return userResponse.data;
       });
@@ -29,31 +40,16 @@ export default function OrderListing() {
       setOrders(allOrders);
       groupByGame(allOrders);
     } catch (error) {
-      console.error("Error fetching orders:", error);
-    }
-  };
-
-  const changeStatus = async (userId, orderId) => {
-    try {
-      const response = await axios.put(
-        `${API_URL}/${userId}/history/${orderId}`,
-        { status: true }
-      );
-      const updatedOrders = orders.map((order) => {
-        if (order.userId === userId && order.id === orderId) {
-          return { ...order, status: true };
-        }
-        return order;
-      });
-      setOrders(updatedOrders);
-      console.log("Status updated successfully:", response.data);
-    } catch (error) {
-      console.error("Error updating status:", error);
+      console.log(error);
     }
   };
 
   const handleStatusFilter = (status) => {
     setFilterStatus(status);
+  };
+
+  const handleGameTitleFilter = (gameTitle) => {
+    setFilterGameTitle(gameTitle);
   };
 
   const groupByGame = (ordersData) => {
@@ -69,24 +65,28 @@ export default function OrderListing() {
     setCurrentOrders(groupedOrders);
   };
 
-  const filteredOrders = filterStatus
-    ? Object.entries(currentOrders).reduce(
-        (filtered, [gameTitle, gameOrders]) => {
-          const filteredGameOrders = gameOrders.filter((order) =>
-            filterStatus === "All"
-              ? true
-              : filterStatus === "Success"
-              ? order.status === true
-              : order.status === false
-          );
-          if (filteredGameOrders.length > 0) {
-            filtered[gameTitle] = filteredGameOrders;
-          }
-          return filtered;
-        },
-        {}
-      )
-    : currentOrders;
+  const filteredOrders = Object.entries(currentOrders).reduce(
+    (filtered, [gameTitle, gameOrders]) => {
+      const filteredGameOrders = gameOrders.filter((order) => {
+        const statusCondition =
+          filterStatus === "" ||
+          (filterStatus === "Success" && order.status === true) ||
+          (filterStatus === "Pending" && order.status === false);
+
+        const gameTitleCondition =
+          filterGameTitle === "" || gameTitle === filterGameTitle;
+
+        return statusCondition && gameTitleCondition;
+      });
+
+      if (filteredGameOrders.length > 0) {
+        filtered[gameTitle] = filteredGameOrders;
+      }
+
+      return filtered;
+    },
+    {}
+  );
 
   const getCurrentOrders = (gameTitle) => {
     return filteredOrders[gameTitle] || [];
@@ -97,6 +97,97 @@ export default function OrderListing() {
       ...prevState,
       [gameTitle]: pageNumber,
     }));
+  };
+
+  const deleteOrder = async (userId, orderId) => {
+    try {
+      const confirmation = await Swal.fire({
+        title: "Are you sure?",
+        text: "You won't be able to revert this!",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonText: "Delete",
+        cancelButtonText: "Cancel",
+        dangerMode: true,
+      });
+
+      if (confirmation.isConfirmed) {
+        await axios.delete(`${API_URL}/${userId}/history/${orderId}`);
+        setOrders((prevOrders) =>
+          prevOrders.filter(
+            (order) => !(order.userId === userId && order.id === orderId)
+          )
+        );
+        setUsers((prevUsers) => {
+          const updatedUsers = [...prevUsers];
+          const userIndex = updatedUsers.findIndex(
+            (user) => user.id === userId
+          );
+          const userOrders = updatedUsers[userIndex]?.orders ?? [];
+          updatedUsers[userIndex] = {
+            ...updatedUsers[userIndex],
+            orders: userOrders.filter((order) => order.id !== orderId),
+          };
+          return updatedUsers;
+        });
+        Swal.fire("Deleted!", "", "success");
+      }
+    } catch (error) {
+      Swal.fire({
+        icon: "error",
+        title: "Oops...",
+        text: `Failed to delete data. Please try again. Error: ${error}`,
+      });
+    }
+  };
+
+  const changeStatus = async (userId, orderId) => {
+    try {
+      const confirmation = await Swal.fire({
+        title: "Pastikan data Sudah benar!!!",
+        showCancelButton: true,
+        confirmButtonText: "Save",
+      });
+
+      if (confirmation.isConfirmed) {
+        await axios.put(`${API_URL}/${userId}/history/${orderId}`, {
+          status: true,
+        });
+        setOrders((prevOrders) =>
+          prevOrders.map((order) => {
+            if (order.userId === userId && order.id === orderId) {
+              return { ...order, status: true };
+            }
+            return order;
+          })
+        );
+        setUsers((prevUsers) => {
+          const updatedUsers = [...prevUsers];
+          const userIndex = updatedUsers.findIndex(
+            (user) => user.id === userId
+          );
+          const userOrders = updatedUsers[userIndex]?.orders ?? [];
+          const updatedUserOrders = userOrders.map((order) => {
+            if (order.id === orderId) {
+              return { ...order, status: true };
+            }
+            return order;
+          });
+          updatedUsers[userIndex] = {
+            ...updatedUsers[userIndex],
+            orders: updatedUserOrders,
+          };
+          return updatedUsers;
+        });
+        Swal.fire("Pesanan Sudah di update", "", "success");
+      }
+    } catch (error) {
+      Swal.fire({
+        icon: "error",
+        title: "Oops...",
+        text: `Gagal update data coba lagi ${error}`,
+      });
+    }
   };
 
   return (
@@ -111,6 +202,22 @@ export default function OrderListing() {
           <option value="">All</option>
           <option value="Success">Success</option>
           <option value="Pending">Pending</option>
+        </select>
+      </div>
+
+      <div className="mb-4">
+        <h3>Filter by Game Title:</h3>
+        <select
+          className="form-control"
+          value={filterGameTitle}
+          onChange={(e) => handleGameTitleFilter(e.target.value)}
+        >
+          <option value="">All</option>
+          {Object.keys(currentOrders).map((gameTitle) => (
+            <option key={gameTitle} value={gameTitle}>
+              {gameTitle}
+            </option>
+          ))}
         </select>
       </div>
 
@@ -141,7 +248,7 @@ export default function OrderListing() {
                   <th>Username</th>
                   <th>Order Id</th>
                   <th>Purchased On</th>
-                  <th>Name Game</th>
+
                   <th>Purchased Price</th>
                   {gameTitle === "Mobile Legend" && (
                     <>
@@ -169,6 +276,19 @@ export default function OrderListing() {
                       <th>Jumlah UC</th>
                     </>
                   )}
+                  {gameTitle === "Higgs Domino" && (
+                    <>
+                      <th>Username</th>
+                      <th>Id Higs</th>
+                      <th>Jumlah Koin</th>
+                    </>
+                  )}
+                  {gameTitle === "Point Blank" && (
+                    <>
+                      <th>Id PB</th>
+                      <th>Jumlah</th>
+                    </>
+                  )}
                   <th className="align-center" style={{ cursor: "pointer" }}>
                     Status
                   </th>
@@ -186,7 +306,6 @@ export default function OrderListing() {
                       <td>{user?.username}</td>
                       <td>{order.id}</td>
                       <td>{order.date}</td>
-                      <td>{order.title}</td>
                       <td>Rp. {parseInt(order.price).toLocaleString()}</td>
                       {gameTitle === "Mobile Legend" && (
                         <>
@@ -218,6 +337,20 @@ export default function OrderListing() {
                           <td>{order.jumlah} UC</td>
                         </>
                       )}
+                      {gameTitle === "Higgs Domino" && (
+                        <>
+                          <td>{userData.usernameHiggs}</td>
+                          <td>{userData.idHigs}</td>
+                          <td>{order.jumlah}M</td>
+                        </>
+                      )}
+
+                      {gameTitle === "Point Blank" && (
+                        <>
+                          <td>{userData.idPb}</td>
+                          <td>{order.jumlah} Cash</td>
+                        </>
+                      )}
                       <td className="align-center">
                         <span
                           className={`badge ${
@@ -234,8 +367,29 @@ export default function OrderListing() {
                           type="button"
                           className="btn btn-default btn-sm"
                           onClick={() => changeStatus(order.userId, order.id)}
+                          style={
+                            order.status
+                              ? { display: "none" }
+                              : { display: "block" }
+                          }
                         >
                           <i className="icon-search"></i> Change Status
+                        </button>
+                        <button
+                          className="btn-danger"
+                          onClick={() => deleteOrder(order.userId, order.id)}
+                          style={
+                            order.status
+                              ? {
+                                  display: "block",
+                                  border: "none",
+                                  padding: "0.5rem",
+                                  borderRadius: "10px",
+                                }
+                              : { display: "none" }
+                          }
+                        >
+                          Delete
                         </button>
                       </td>
                     </tr>
