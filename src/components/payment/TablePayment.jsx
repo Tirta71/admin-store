@@ -205,6 +205,7 @@ export default function TablePayment() {
                   <th>User Name</th>
                   <th>Order Id</th>
                   <th>Purchase On</th>
+                  <th>Pembayaran</th>
                   <th>Total Top Up</th>
                   <th>Status</th>
                   <th>Action</th>
@@ -217,6 +218,7 @@ export default function TablePayment() {
                     <td>{getUsername(payment.userId)}</td>
                     <td>{payment.id}</td>
                     <td>{payment.date}</td>
+                    <td>{payment.Pembayaran}</td>
                     <td>Rp. {parseInt(payment.price).toLocaleString()}</td>
                     <td>
                       <span
