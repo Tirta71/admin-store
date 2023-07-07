@@ -49,6 +49,9 @@ export default function SideBar() {
               <li>
                 <a href="/customer"> View Customers </a>
               </li>
+              <li>
+                <a href="/no-login"> Guest </a>
+              </li>
             </ul>
           </li>
         </ul>
